@@ -7,7 +7,7 @@ from .resources import read_text_resource
 from .shared_utils import InstrDict, arg_lut
 
 pp = pprint.PrettyPrinter(indent=2)
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:: %(message)s")
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s:: %(message)s")
 
 
 def make_json_opc(instr_dict: InstrDict):
