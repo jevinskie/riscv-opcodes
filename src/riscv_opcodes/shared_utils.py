@@ -20,7 +20,7 @@ from .constants import (
 from .resources import open_text_resource, resource_root
 
 LOG_FORMAT = "%(levelname)s:: %(message)s"
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 pretty_printer = pprint.PrettyPrinter(indent=2)
 logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT)

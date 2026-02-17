@@ -3,10 +3,14 @@ import json
 import logging
 import pprint
 
+from rich import print
+from rich.pretty import pprint as rpprint
+
 from .c_utils import make_c
 from .chisel_utils import make_chisel
 from .constants import emitted_pseudo_ops
 from .go_utils import make_go
+from .json_opc_utils import make_json_opc
 from .latex_utils import make_latex_table, make_priv_latex_table
 from .rust_utils import make_rust
 from .shared_utils import add_segmented_vls_insn, create_inst_dict
@@ -14,7 +18,7 @@ from .sverilog_utils import make_sverilog
 from .svg_utils import make_svg
 
 LOG_FORMAT = "%(levelname)s:: %(message)s"
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 pretty_printer = pprint.PrettyPrinter(indent=2)
 logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT)
@@ -31,10 +35,13 @@ def generate_extensions(
     go: bool,
     latex: bool,
     svg: bool,
+    json_opc: bool,
 ):
     instr_dict = create_inst_dict(extensions, include_pseudo)
     instr_dict = dict(sorted(instr_dict.items()))
     instr_dict_with_segment = add_segmented_vls_insn(instr_dict)
+
+    # rpprint(instr_dict_with_segment)
 
     with open("instr_dict.json", "w", encoding="utf-8") as outfile:
         json.dump(instr_dict_with_segment, outfile, indent=2)
@@ -44,6 +51,7 @@ def generate_extensions(
             extensions, False, include_pseudo_ops=emitted_pseudo_ops
         )
         instr_dict_c = dict(sorted(instr_dict_c.items()))
+        # rpprint(instr_dict_with_segment)
         make_c(instr_dict_c)
         logging.info("encoding.out.h generated successfully")
 
@@ -77,6 +85,10 @@ def generate_extensions(
         make_svg(instr_dict)
         logging.info("inst.svg generated successfully")
 
+    if json_opc:
+        make_json_opc(instr_dict)
+        logging.info("opc.out.json generated successfully")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generate RISC-V constants headers")
@@ -97,6 +109,7 @@ def main():
     parser.add_argument("-go", action="store_true", help="Generate output for Go")
     parser.add_argument("-latex", action="store_true", help="Generate output for Latex")
     parser.add_argument("-svg", action="store_true", help="Generate .svg output")
+    parser.add_argument("-json", action="store_true", help="Generate .json output")
     parser.add_argument(
         "extensions",
         nargs="*",
@@ -118,4 +131,5 @@ def main():
         args.go,
         args.latex,
         args.svg,
+        args.json,
     )
