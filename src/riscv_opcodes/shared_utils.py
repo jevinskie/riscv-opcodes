@@ -3,10 +3,14 @@ import logging
 import os
 import pprint
 import re
+from dataclasses import dataclass
 from fnmatch import fnmatch
 from io import StringIO
 from itertools import chain
 from typing import Dict, NoReturn, Optional, TypedDict
+
+from rich import print
+from rich.pretty import pprint as rpprint
 
 from .constants import (
     arg_lut,
@@ -162,6 +166,34 @@ class SingleInstr(TypedDict):
     extension: "list[str]"
     match: str
     mask: str
+
+
+@dataclass
+class SingleInstrDetail:
+    encoding: str
+    variable_fields: "list[str]"
+    extension: "list[str]"
+    match: int
+    mask: int
+
+    @property
+    def bpat(self) -> str:
+        return f"{self.match:032b}"
+
+    @property
+    def bmsk(self) -> str:
+        return f"{self.mask:032b}"
+
+    @classmethod
+    def make_with_singleinstr(cls, i: SingleInstr) -> "SingleInstrDetail":
+        vf = []
+        return cls(
+            i["encoding"],
+            i["variable_fields"],
+            i["extension"],
+            int(i["match"], 16),
+            int(i["mask"], 16),
+        )
 
 
 InstrDict = Dict[str, SingleInstr]

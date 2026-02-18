@@ -2,15 +2,29 @@ import logging
 import os
 import pprint
 
+from rich import print
+from rich.pretty import pprint as rpprint
+
 from .constants import causes, csrs, csrs32
 from .resources import read_text_resource
-from .shared_utils import InstrDict, arg_lut
+from .shared_utils import InstrDict, SingleInstr, SingleInstrDetail, arg_lut
 
 pp = pprint.PrettyPrinter(indent=2)
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s:: %(message)s")
 
 
+def make_instr_detailed(i: SingleInstr) -> SingleInstrDetail:
+    return SingleInstrDetail(
+        i["encoding"],
+        i["variable_fields"],
+        i["extension"],
+        int(i["match"], 16),
+        int(i["mask"], 16),
+    )
+
+
 def make_json_opc(instr_dict: InstrDict):
+    rpprint(instr_dict)
     mask_match_str = ""
     declare_insn_str = ""
     for i in instr_dict:
@@ -21,6 +35,9 @@ def make_json_opc(instr_dict: InstrDict):
             f'#define MASK_{i.upper().replace(".","_")} {instr_dict[i]["mask"]}\n'
         )
         declare_insn_str += f'DECLARE_INSN({i.replace(".","_")}, MATCH_{i.upper().replace(".","_")}, MASK_{i.upper().replace(".","_")})\n'
+        idetailed = make_instr_detailed(instr_dict[i])
+        logging.debug(f"INST: {i}")
+        rpprint(idetailed)
 
     csr_names_str = ""
     declare_csr_str = ""
