@@ -13,16 +13,6 @@ pp = pprint.PrettyPrinter(indent=2)
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s:: %(message)s")
 
 
-def make_instr_detailed(i: SingleInstr) -> SingleInstrDetail:
-    return SingleInstrDetail(
-        i["encoding"],
-        i["variable_fields"],
-        i["extension"],
-        int(i["match"], 16),
-        int(i["mask"], 16),
-    )
-
-
 def make_json_opc(instr_dict: InstrDict):
     rpprint(instr_dict)
     mask_match_str = ""
@@ -35,7 +25,7 @@ def make_json_opc(instr_dict: InstrDict):
             f'#define MASK_{i.upper().replace(".","_")} {instr_dict[i]["mask"]}\n'
         )
         declare_insn_str += f'DECLARE_INSN({i.replace(".","_")}, MATCH_{i.upper().replace(".","_")}, MASK_{i.upper().replace(".","_")})\n'
-        idetailed = make_instr_detailed(instr_dict[i])
+        idetailed = SingleInstrDetail.make_with_singleinstr(instr_dict[i])
         logging.debug(f"INST: {i}")
         rpprint(idetailed)
 
